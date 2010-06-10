@@ -1,13 +1,14 @@
 # TimeClock V2
 # Basic timeclock functionality
 
-
-require "sinatra"
 require 'rubygems'
+require 'sinatra'
 require 'dm-core'
+require 'dm-migrations'
 require 'digest/sha1'
 
-DataMapper.setup(:default, 'mysql://rubytest:rubytestpass@local.derbserv.org/rubytest')
+# DataMapper.setup(:default, 'mysql://rubytest:rubytestpass@local.derbserv.org/rubytest')
+DataMapper.setup(:default, 'sqlite3:timeclock.db')
 
 class Punch
   include DataMapper::Resource
@@ -31,8 +32,19 @@ DataMapper.auto_upgrade!
 get '/' do
   username = cookiecheck(request.cookies["MainSiteKey"])
   if !username
-    redirect '/login'
-  end
+      return <<-EOL
+      <title>Basic Timeclockiness</title>
+      <body>You must log in:<br/>
+      <form method=post action="loginsubmit" />
+    Username:<br/>
+      <input type="text" name="username" /><br/>
+    Password:<br/>
+      <input type="text" name="password" />
+      <input type="submit" value="Log in" />
+      </form>
+      </body>
+      EOL
+  else
   punchstate=getstate(username)
 
   return <<-EOL
@@ -44,12 +56,13 @@ get '/' do
   </body>
   EOL
 end
+end
 
 post '/submit' do
 
   username = cookiecheck(request.cookies["MainSiteKey"])
   if !username
-    redirect '/login'
+    redirect '/'
   end
   punchstate = getstate(username)
 
@@ -62,28 +75,17 @@ post '/submit' do
 end
 
 get '/login' do
-  return <<-EOL
-  <title>Basic Timeclockiness</title>
-  <body>You must log in:<br/>
-  <form method=post action="loginsubmit" />
-Username:<br/>
-  <input type="text" name="username" /><br/>
-Password:<br/>
-  <input type="text" name="password" />
-  <input type="submit" value="Log in" />
-  </form>
-  </body>
-  EOL
+
 end
 
 post '/loginsubmit' do
   username=params[:username]
   password=params[:password]
-  if passcheck(username,password)
+#  if passcheck(username,password)
     redirect '/'
-  else
-    redirect '/login'
-  end
+#  else
+#    redirect '/login'
+#  end
   
 end
 
