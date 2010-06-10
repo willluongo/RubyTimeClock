@@ -74,19 +74,12 @@ post '/submit' do
   return "Punch #{punchstate} for #{username} successful!"
 end
 
-get '/login' do
-
-end
-
 post '/loginsubmit' do
   username=params[:username]
   password=params[:password]
-#  if passcheck(username,password)
-    redirect '/'
-#  else
-#    redirect '/login'
-#  end
-  
+  passcheck(username,password)
+  redirect '/'
+
 end
 
 
@@ -129,7 +122,7 @@ end
 def passcheck(username,attempt)
   passinfo=User.first(:username => username)
   if !passinfo
-    redirect '/login'
+    redirect '/'
   end
   if Digest::SHA1.hexdigest(attempt) == passinfo.password
     timestamp=Time.now.strftime("%Y%m%d%H%M%S")
