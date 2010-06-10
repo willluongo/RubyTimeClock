@@ -1,0 +1,3 @@
+== TimeClockV2
+
+A very primitive and ugly time clock implemented in Ruby, using Sinatra and DataMapper
