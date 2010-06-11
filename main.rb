@@ -6,6 +6,7 @@ require 'sinatra'
 require 'dm-core'
 require 'dm-migrations'
 require 'digest/sha1'
+require 'rack-flash'
 
 # DataMapper.setup(:default, 'mysql://rubytest:rubytestpass@local.derbserv.org/rubytest')
 DataMapper.setup(:default, 'sqlite3:timeclock.db')
@@ -24,7 +25,7 @@ class User
   property :username, String
   property :password, String
   property :cookie, String
-  property :admin, String
+  property :admin, Boolean
 end
 
 DataMapper.auto_upgrade!
@@ -34,22 +35,24 @@ get '/' do
   if !username
       return <<-EOL
       <title>Basic Timeclockiness</title>
-      <body>You must log in:<br/>
+      <body>
+      <h1>#{alert()}</h1><br/>
+      You must log in:<br/>
       <form method=post action="loginsubmit" />
     Username:<br/>
       <input type="text" name="username" /><br/>
     Password:<br/>
-      <input type="text" name="password" />
+      <input type="password" name="password" />
       <input type="submit" value="Log in" />
       </form>
       </body>
       EOL
   else
   punchstate=getstate(username)
-
   return <<-EOL
   <title>Basic Timeclockiness</title>
   <body>
+  <h1>#{alert()}</h1><p>
   <form method=post action="submit" />
   <input type="submit" value="Punch #{username} #{punchstate}" />
   </form>
@@ -71,7 +74,8 @@ post '/submit' do
     :punchtime  =>  Time.now,
     :punchstate =>  punchstate
   )
-  return "Punch #{punchstate} for #{username} successful!"
+  setalert("Punch #{punchstate} for #{username} successful!")
+  redirect '/'
 end
 
 post '/loginsubmit' do
@@ -79,13 +83,64 @@ post '/loginsubmit' do
   password=params[:password]
   passcheck(username,password)
   redirect '/'
-
 end
 
 
 get '/admin' do
+  username = cookiecheck(request.cookies["MainSiteKey"])
+  if !username
+    redirect '/'
+  end
+  admininfo=User.first(:username => username)
+  if admininfo.admin
+    return <<-EOL
+    <title>TimeClock Administration</title>
+    <body>
+    <h1>ADMINISTRATION!<br/>#{alert()}<br/></h1>
+    <form method=post action="createuser" />
+    <label for="username">Username:</label><br/>
+      <input type="text" name="username" id="username"/><br/>
+    <label for="password">Password:</label><br/>
+      <input type="text" name="password" id="password"/><br/>
+      <input type="checkbox" name="admin" value="true" id="admin"/><label for="admin">Admin?</label><br/>
+      <input type="submit" value="Create user" />
+      </form>
+    </body>
+
+
+EOL
+  else
+    # return "You are not logged in as an administrative user."
+    setalert("You are not logged in as an administrative user.")
+    redirect '/'
+   end
 
 end
+
+post '/createuser' do
+  username = params[:username]
+  password = params[:password]
+  if params[:admin] == 'true'
+    admin = true
+  else
+    admin = false
+  end
+  
+  
+  if !(username == '') && !(password=='')
+  User.create(
+  :username => username,
+  :password => Digest::SHA1.hexdigest(password),
+  :cookie => "none",
+  :admin => admin
+  )
+  setalert("User successfully created!")
+  else
+    setalert("Username and password fields are required.")
+  end
+  redirect '/admin'
+end
+
 
 get '/report' do
 
@@ -103,6 +158,7 @@ def cookiecheck(sessioncookie)
 
 end
 
+# Checks for current punch state and returns the opposite
 def getstate(username)
   punchstate=''
     lastpunch = Punch.all(:username => username)
@@ -121,15 +177,26 @@ end
 
 def passcheck(username,attempt)
   passinfo=User.first(:username => username)
-  if !passinfo
+  unless passinfo
+    setalert("Username or password are incorrect")
     redirect '/'
   end
   if Digest::SHA1.hexdigest(attempt) == passinfo.password
     timestamp=Time.now.strftime("%Y%m%d%H%M%S")
     uniquestamp = username << timestamp
     digest = Digest::MD5.hexdigest(uniquestamp)
-    response.set_cookie("MainSiteKey", {:value => digest, :expiration => Time.now + 600})
+    response.set_cookie("MainSiteKey", {:value => digest, :expires => Time.now + 300})
     passinfo.update(:cookie => digest)
     return "success"
   end
+end
+
+def alert()
+  alert = request.cookies["Alert"]
+  #response.set_cookie("Alert", {:value => "", :expires => Time.now + 600})
+  return alert
+end
+
+def setalert(alert)
+  response.set_cookie("Alert", {:value => alert, :expires => Time.now + 2})
 end
