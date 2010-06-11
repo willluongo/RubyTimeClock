@@ -6,7 +6,6 @@ require 'sinatra'
 require 'dm-core'
 require 'dm-migrations'
 require 'digest/sha1'
-require 'rack-flash'
 
 # DataMapper.setup(:default, 'mysql://rubytest:rubytestpass@local.derbserv.org/rubytest')
 DataMapper.setup(:default, 'sqlite3:timeclock.db')
