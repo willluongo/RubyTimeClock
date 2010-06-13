@@ -104,6 +104,7 @@ get '/admin' do
       <input type="checkbox" name="admin" value="true" id="admin"/><label for="admin">Admin?</label><br/>
       <input type="submit" value="Create user" />
       </form>
+      #{listbuilder()}
     </body>
 
 
@@ -117,6 +118,11 @@ EOL
 end
 
 post '/createuser' do
+	logincheck = cookiecheck(request.cookies["MainSiteKey"])
+  if !logincheck
+  	setalert("Login expired")
+    redirect '/'
+  end
   username = params[:username]
   password = params[:password]
   if params[:admin] == 'true'
@@ -124,8 +130,7 @@ post '/createuser' do
   else
     admin = false
   end
-  
-  
+    
   if !(username == '') && !(password=='')
   User.create(
   :username => username,
@@ -198,4 +203,19 @@ end
 
 def setalert(alert)
   response.set_cookie("Alert", {:value => alert, :expires => Time.now + 2})
+end
+
+def listbuilder()
+	userlist=User.all()
+	usersform ='<table border="0"><tr><td>Username</td><td>Admin</td></tr>'
+	userlist.each do |c|
+		if c.admin
+			checker = "CHECKED"
+		else
+			checker =""
+		end
+		usersform << "<tr><td>" << c.username << "</td><td><center><input type=\"checkbox\" name=\"" << c.username << "\" value=\"true\" " << checker << "></td></tr>"
+	end
+	usersform << "</table>"
+	return usersform
 end
