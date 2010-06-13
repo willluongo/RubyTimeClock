@@ -153,23 +153,21 @@ get '/report' do
 end
 
 post '/moduser' do
-
-dicks=Array.new
-
-query = User.all
-query.each do |c|
-  dicks << c.username
-end
-
-params[:dicks].each_with_index do |c,i| 
-  tempthing = User.all(:username => i)
-  if c == "on"
-    tempthing.admin = true
-  else
-    tempthing.admin = false
+  query = User.all(:fields => [:id, :username]) # this assumes DataMapper
+  
+  # make an array of usernames
+  # map! replaces the original array with the new one.
+  query.map! do |userlist|
+    userlist.username
   end
-  tempthing.save
+
+  # make that into an array in the form desired
+  query.map! do |username|
+    " #{username} #{params[username]}<br />"
+  end
+  query.join("\n")
 end
-setaler("User modification successful")
-redirect '/admin'
-end
+
+#setalert("User modification successful")
+#redirect '/admin'
+#end

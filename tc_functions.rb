@@ -44,7 +44,7 @@ end
 
 def alert()
   alert = request.cookies["Alert"]
-  response.set_cookie("Alert", {:value => "", :expires => Time.now + 600})
+  response.set_cookie("Alert", {:value => "", :expires => Time.now})
   return alert
 end
 
