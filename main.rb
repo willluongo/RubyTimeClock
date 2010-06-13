@@ -197,7 +197,7 @@ end
 
 def alert()
   alert = request.cookies["Alert"]
-  #response.set_cookie("Alert", {:value => "", :expires => Time.now + 600})
+  response.set_cookie("Alert", {:value => "", :expires => Time.now + 600})
   return alert
 end
 
@@ -207,15 +207,39 @@ end
 
 def listbuilder()
 	userlist=User.all()
-	usersform ='<table border="0"><tr><td>Username</td><td>Admin</td></tr>'
+	usersform ="<form method=post action=\"moduser\" /><table border=\"0\"><tr><td>Username</td><td>Admin</td><td>Delete</tr>"
 	userlist.each do |c|
 		if c.admin
 			checker = "CHECKED"
 		else
 			checker =""
 		end
-		usersform << "<tr><td>" << c.username << "</td><td><center><input type=\"checkbox\" name=\"" << c.username << "\" value=\"true\" " << checker << "></td></tr>"
+		usersform << "<tr><td>" << c.username << "</td>"
+		usersform << "<td><center><input type=\"checkbox\" name=\"" << c.username << "\"  " << checker << "></td>"
+		usersform << "<td><center><input type=\"checkbox\" name=\"" << c.username << "delete\" ></td></tr>"
 	end
-	usersform << "</table>"
+	usersform << "</table><br/><input type=\"submit\" value=\"Modify users\" /></form>"
 	return usersform
+end
+
+post '/moduser' do
+
+dicks=Array.new
+
+query = User.all
+query.each do |c|
+  dicks << c.username
+end
+
+params[:dicks].each_with_index do |c,i| 
+  tempthing = User.all(:username => i)
+  if c == "on"
+    tempthing.admin = true
+  else
+    tempthing.admin = false
+  end
+  tempthing.save
+end
+setaler("User modification successful")
+redirect '/admin'
 end
