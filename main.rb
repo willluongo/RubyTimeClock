@@ -165,12 +165,23 @@ post '/moduser' do
   
     
   # make that into an array in the form desired
-  listem.each do |username|
-    newlist << " #{username} #{params[username]}<br />"
+#  listem.each do |username|
+#    newlist << " #{username} #{params[username]}<br />"
+#  end
+#  newlist.join("\n")
+listem.each do |username|
+  tempthing = User.first(:username => username)
+  if params[username]
+    tempthing.admin = true
+  else
+    tempthing.admin = false
   end
-  newlist.join("\n")
+
+  tempthing.save
+end  
+  setalert("User modification successful")
+  redirect '/admin'
 end
 
-#setalert("User modification successful")
-#redirect '/admin'
+
 #end
