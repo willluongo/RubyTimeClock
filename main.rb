@@ -154,18 +154,21 @@ end
 
 post '/moduser' do
   query = User.all(:fields => [:id, :username]) # this assumes DataMapper
+  listem = Array.new
+  newlist = Array.new
   
   # make an array of usernames
   # map! replaces the original array with the new one.
-  query.map! do |userlist|
-    userlist.username
+  query.each do |c|
+    listem << c.username
   end
-
+  
+    
   # make that into an array in the form desired
-  query.map! do |username|
-    " #{username} #{params[username]}<br />"
+  listem.each do |username|
+    newlist << " #{username} #{params[username]}<br />"
   end
-  query.join("\n")
+  newlist.join("\n")
 end
 
 #setalert("User modification successful")
