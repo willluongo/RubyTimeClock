@@ -180,21 +180,15 @@ end
 
 listem.each do |username|
   temp_User = User.first(:username => username)
-  temp_param = username << "delete"
-  temp_punches = Punch.all(:username => username)
+  temp_param = username + "delete"
   if params[temp_param]
     temp_User.destroy!
-    temp_punches.each do |c|
-      c.destroy!
-    end
-    
+    temp_punches = Punch.all(:username => username)
+    temp_punches.destroy!
   end
 end
-  
-  
+
+
   setalert("User modification successful")
   redirect '/admin'
 end
-
-
-#end
