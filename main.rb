@@ -162,8 +162,7 @@ post '/moduser' do
   query.each do |c|
     listem << c.username
   end
-  
-    
+
   # make that into an array in the form desired
 #  listem.each do |username|
 #    newlist << " #{username} #{params[username]}<br />"
@@ -176,9 +175,23 @@ listem.each do |username|
   else
     tempthing.admin = false
   end
-
   tempthing.save
-end  
+end
+
+listem.each do |username|
+  temp_User = User.first(:username => username)
+  temp_param = username << "delete"
+  temp_punches = Punch.all(:username => username)
+  if params[temp_param]
+    temp_User.destroy!
+    temp_punches.each do |c|
+      c.destroy!
+    end
+    
+  end
+end
+  
+  
   setalert("User modification successful")
   redirect '/admin'
 end
