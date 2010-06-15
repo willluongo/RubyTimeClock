@@ -149,25 +149,28 @@ end
 
 
 get '/report' do
-
+  username = cookiecheck(request.cookies["MainSiteKey"])
+  if !username
+    redirect '/'
+  end
+  list_punches = Punch.all(:username => username)
+  list = ""
+  list_punches.each do |stuff|
+    stuff.punchtime
+  list << "#{stuff.username} punched #{stuff.punchstate} on #{stuff.punchtime.strftime(fmt='%F')} at #{stuff.punchtime.strftime(fmt='%T')}<br/>"
+  end
+  return list
 end
 
 post '/moduser' do
-  query = User.all(:fields => [:id, :username]) # this assumes DataMapper
+  query = User.all(:fields => [:id, :username])
   listem = Array.new
   newlist = Array.new
-  
-  # make an array of usernames
-  # map! replaces the original array with the new one.
+
   query.each do |c|
     listem << c.username
   end
 
-  # make that into an array in the form desired
-#  listem.each do |username|
-#    newlist << " #{username} #{params[username]}<br />"
-#  end
-#  newlist.join("\n")
 listem.each do |username|
   tempthing = User.first(:username => username)
   if params[username]
@@ -187,7 +190,6 @@ listem.each do |username|
     temp_punches.destroy!
   end
 end
-
 
   setalert("User modification successful")
   redirect '/admin'
