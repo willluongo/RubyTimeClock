@@ -6,8 +6,10 @@ require 'sinatra'
 require 'dm-core'
 require 'dm-migrations'
 require 'digest/sha1'
+require 'haml'
 
 require 'tc_functions'
+require 'sinatra/reloader'
 
 # DataMapper.setup(:default, 'mysql://rubytest:rubytestpass@local.derbserv.org/rubytest')
 DataMapper.setup(:default, 'sqlite3:timeclock.db')
@@ -31,36 +33,49 @@ end
 
 DataMapper.auto_upgrade!
 
+# get '/' do
+#   username = cookiecheck(request.cookies["MainSiteKey"])
+#   if !username
+#       return <<-EOL
+#       <title>Basic Timeclockiness</title>
+#       <body>
+#       <h1>#{alert()}</h1><br/>
+#       You must log in:<br/>
+#       <form method=post action="loginsubmit" />
+#     Username:<br/>
+#       <input type="text" name="username" /><br/>
+#     Password:<br/>
+#       <input type="password" name="password" />
+#       <input type="submit" value="Log in" />
+#       </form>
+#       </body>
+#       EOL
+#   else
+#   punchstate=getstate(username)
+#   return <<-EOL
+#   <title>Basic Timeclockiness</title>
+#   <body>
+#   <h1>#{alert()}</h1><p>
+#   <form method=post action="submit" />
+#   <input type="submit" value="Punch #{username} #{punchstate}" />
+#   </form>
+#   </body>
+#   EOL
+# end
+# end
+
 get '/' do
-  username = cookiecheck(request.cookies["MainSiteKey"])
-  if !username
-      return <<-EOL
-      <title>Basic Timeclockiness</title>
-      <body>
-      <h1>#{alert()}</h1><br/>
-      You must log in:<br/>
-      <form method=post action="loginsubmit" />
-    Username:<br/>
-      <input type="text" name="username" /><br/>
-    Password:<br/>
-      <input type="password" name="password" />
-      <input type="submit" value="Log in" />
-      </form>
-      </body>
-      EOL
-  else
-  punchstate=getstate(username)
-  return <<-EOL
-  <title>Basic Timeclockiness</title>
-  <body>
-  <h1>#{alert()}</h1><p>
-  <form method=post action="submit" />
-  <input type="submit" value="Punch #{username} #{punchstate}" />
-  </form>
-  </body>
-  EOL
+  @title="Testing"
+  @heading="Hi"
+  haml :mainpage
 end
+
+post '/submitpunch' do
+  return params[:textings]
 end
+
+
+
 
 post '/submit' do
 
