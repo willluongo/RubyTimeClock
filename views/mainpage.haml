@@ -3,5 +3,20 @@
     %title #{@title}
     %link{:rel => "stylesheet", :type => "text/css", :href => "theme.css"}
   %body
-    %h1 #{@heading}
-    
+    %div{:id => "activePane"}
+      %h1 #{@heading}
+      %form{:method => "post", :action => "submitpunch"}
+        %p
+          %label{:for => "name"}
+          %input{:type => "text", :name => "textings", :id => "username"}
+          %br
+          %input{:type => "submit", :value => "Submit Punch", :id => "button"}
+    %div{:id => "sideBar"}
+
+      %a{:href => "/"} Home
+      %br
+      %a{:href => "/use"} Use Time
+      %br
+      %a{:href => "/admin"} Admin
+      %br
+      %a{:href => "/logout"} Logout

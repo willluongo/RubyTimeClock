@@ -9,3 +9,15 @@ h1
 {
 	color:6666CC;
 }
+
+#activePane {
+	float: left;
+	width: 90%;
+	border-right: 2px solid black;
+	height: 100%;
+}               
+
+#sideBar {
+	border-left: 1px solid black;
+	
+}
