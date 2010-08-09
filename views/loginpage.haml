@@ -1,0 +1,18 @@
+%html
+  %head
+    %title #{@title}
+    %link{:rel => "stylesheet", :type => "text/css", :href => "theme.css"}
+  %body
+    %div{:id => "activePane"}
+      %h1 #{@alert}
+      %form{:method => "post", :action => "loginsubmit"}
+        Username:
+        %br
+        %input{:type => "text", :name =>"username"}
+        %br
+        Password:
+        %br
+        %input{:type => "password", :name => "password"}
+        %br
+        %input{:type => "submit", :value => "Log in"}
+    #{haml :sidebar, :layout => false}

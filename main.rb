@@ -33,6 +33,15 @@ end
 
 DataMapper.auto_upgrade!
 
+class Dummy
+  def admin
+    @admin
+  end
+  def admin=(admin)
+    @admin = admin
+  end
+end
+
 # get '/' do
 #   username = cookiecheck(request.cookies["MainSiteKey"])
 #   if !username
@@ -65,10 +74,31 @@ DataMapper.auto_upgrade!
 # end
 
 get '/' do
-  @title="Testing"
-  @heading="Hi"
-  haml :mainpage
+  @title="Timeclock"
+  @username = cookiecheck(request.cookies["MainSiteKey"])
+  if !@username
+    @title="Timeclock - Log In"
+    @alert=alert()
+    @admininfo=Dummy.new
+    @admininfo.admin = false
+    haml :loginpage
+  else
+    @punchstate=getstate(@username)
+    @username = cookiecheck(request.cookies["MainSiteKey"])
+    @alert=alert()
+    @admininfo=User.first(:username => @username)
+    
+    haml :mainpage
+  end
 end
+
+get '/logout' do
+  response.set_cookie("MainSiteKey", {:value => "", :expires => Time.now})
+  setalert("Succesfully logged out.")
+  redirect '/'
+end
+
+
 
 post '/submitpunch' do
   return params[:textings]
@@ -78,19 +108,18 @@ end
 
 
 post '/submit' do
-
-  username = cookiecheck(request.cookies["MainSiteKey"])
-  if !username
+  @username = cookiecheck(request.cookies["MainSiteKey"])
+  if !@username
     redirect '/'
   end
-  punchstate = getstate(username)
+  @punchstate = getstate(@username)
 
   Punch.create(
-    :username =>  username,
+    :username =>  @username,
     :punchtime  =>  Time.now,
-    :punchstate =>  punchstate
+    :punchstate =>  @punchstate
   )
-  setalert("Punch #{punchstate} for #{username} successful!")
+  setalert("Punch #{@punchstate} for #{@username} successful!")
   redirect '/'
 end
 
@@ -103,29 +132,13 @@ end
 
 
 get '/admin' do
-  username = cookiecheck(request.cookies["MainSiteKey"])
-  if !username
+  @username = cookiecheck(request.cookies["MainSiteKey"])
+  if !@username
     redirect '/'
   end
-  admininfo=User.first(:username => username)
-  if admininfo.admin
-    return <<-EOL
-    <title>TimeClock Administration</title>
-    <body>
-    <h1>ADMINISTRATION!<br/>#{alert()}<br/></h1>
-    <form method=post action="createuser" />
-    <label for="username">Username:</label><br/>
-      <input type="text" name="username" id="username"/><br/>
-    <label for="password">Password:</label><br/>
-      <input type="text" name="password" id="password"/><br/>
-      <input type="checkbox" name="admin" value="true" id="admin"/><label for="admin">Admin?</label><br/>
-      <input type="submit" value="Create user" />
-      </form>
-      #{listbuilder()}
-    </body>
-
-
-EOL
+  @admininfo=User.first(:username => @username)
+  if @admininfo.admin
+    haml :adminpage
   else
     # return "You are not logged in as an administrative user."
     setalert("You are not logged in as an administrative user.")

@@ -1,0 +1,15 @@
+%div{:id => "sideBar"}
+
+  %a{:href => "/"} Home
+  %br
+  %a{:href => "/use"} Use Time
+  
+  - if @admininfo.admin
+    %br
+    %a{:href => "/admin"} Admin
+  
+  
+  
+  
+  %br
+  %a{:href => "/logout"} Logout

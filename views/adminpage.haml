@@ -1,0 +1,29 @@
+%html
+  %head
+    %title #{@title}
+    %link{:rel => "stylesheet", :type => "text/css", :href => "theme.css"}
+  %body
+    %div{:id => "activePane"}
+      %h1 Administration
+      %h2 #{alert()}
+      %form{:method => "post", :action => "createuser"}
+        %br
+        %label{:for => "username"}
+          Username:
+        %br
+        %input{:type => "text", :name => "username", :id => "username"}
+        %br
+        
+        %label{:for => "password"}
+          Password:
+        %br
+        %input{:type => "text", :name => "password", :id => "password"}
+        %br
+        
+        %input{:type => "checkbox", :name => "admin", :value => "true", id => "admin"}
+        %label{:for => "admin"}
+          Admin?
+        %br
+        %input{:type => "submit", :value => "Create user"}
+      #{listbuilder()}
+    #{haml :sidebar, :layout => false}
