@@ -31,6 +31,14 @@ class User
   property :admin, Boolean
 end
 
+class Taker
+  include DataMapper::Resource
+  property :id, Serial
+  property :username, String
+  property :hours, Float
+  property :note, String
+end
+
 DataMapper.auto_upgrade!
 
 class Dummy
@@ -42,37 +50,6 @@ class Dummy
   end
 end
 
-# get '/' do
-#   username = cookiecheck(request.cookies["MainSiteKey"])
-#   if !username
-#       return <<-EOL
-#       <title>Basic Timeclockiness</title>
-#       <body>
-#       <h1>#{alert()}</h1><br/>
-#       You must log in:<br/>
-#       <form method=post action="loginsubmit" />
-#     Username:<br/>
-#       <input type="text" name="username" /><br/>
-#     Password:<br/>
-#       <input type="password" name="password" />
-#       <input type="submit" value="Log in" />
-#       </form>
-#       </body>
-#       EOL
-#   else
-#   punchstate=getstate(username)
-#   return <<-EOL
-#   <title>Basic Timeclockiness</title>
-#   <body>
-#   <h1>#{alert()}</h1><p>
-#   <form method=post action="submit" />
-#   <input type="submit" value="Punch #{username} #{punchstate}" />
-#   </form>
-#   </body>
-#   EOL
-# end
-# end
-
 get '/' do
   @title="Timeclock"
   @username = cookiecheck(request.cookies["MainSiteKey"])
@@ -81,6 +58,7 @@ get '/' do
     @alert=alert()
     @admininfo=Dummy.new
     @admininfo.admin = false
+    @hoursused = Punch.all(:username => @username)
     haml :loginpage
   else
     @punchstate=getstate(@username)

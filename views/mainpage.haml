@@ -7,4 +7,5 @@
       %h1 #{@alert}
       %form{:method => "post", :action => "submit"}
         %input{:type => "submit", :value => "Punch #{@username} #{@punchstate}"}
+      / %p #{@hoursused.each}
     #{haml :sidebar, :layout => false}
