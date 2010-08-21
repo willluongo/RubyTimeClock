@@ -72,10 +72,10 @@ get '/' do
     (0..@list.length-2).step(2) do |i| 
       @output << "#{@list[i].username} punched #{@list[i].punchstate} on #{@list[i].punchtime.strftime(fmt='%F')} at #{@list[i].punchtime.strftime(fmt='%T')}</br>"
       @output << "#{@list[i+1].username} punched #{@list[i+1].punchstate} on #{@list[i+1].punchtime.strftime(fmt='%F')} at #{@list[i+1].punchtime.strftime(fmt='%T')}</br>"
-      @output << "#{((@list[i+1].punchtime - @list[i].punchtime).to_f*24).to_s}</br>"
+      @output << "Hours worked: #{((@list[i+1].punchtime - @list[i].punchtime).to_f*24).to_s}</br></br>"
       @total += ((@list[i+1].punchtime - @list[i].punchtime).to_f*24)
     end
-    @output << "</br></br>Hours Worked: " << @total.to_s
+    @output << "</br></br>Total Hours Worked: " << @total.to_s
     
     
     haml :mainpage
