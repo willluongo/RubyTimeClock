@@ -66,6 +66,18 @@ get '/' do
     @alert=alert()
     @admininfo=User.first(:username => @username)
     
+    @output=""
+    @total = 0
+    @list = Punch.all(:username => @username)  # 
+    (0..@list.length-2).step(2) do |i| 
+      @output << "#{@list[i].username} punched #{@list[i].punchstate} on #{@list[i].punchtime.strftime(fmt='%F')} at #{@list[i].punchtime.strftime(fmt='%T')}</br>"
+      @output << "#{@list[i+1].username} punched #{@list[i+1].punchstate} on #{@list[i+1].punchtime.strftime(fmt='%F')} at #{@list[i+1].punchtime.strftime(fmt='%T')}</br>"
+      @output << "#{((@list[i+1].punchtime - @list[i].punchtime).to_f*24).to_s}</br>"
+      @total += ((@list[i+1].punchtime - @list[i].punchtime).to_f*24)
+    end
+    @output << "</br></br>Hours Worked: " << @total.to_s
+    
+    
     haml :mainpage
   end
 end
@@ -155,17 +167,22 @@ end
 
 
 get '/report' do
-  username = cookiecheck(request.cookies["MainSiteKey"])
-  if !username
+  @username = cookiecheck(request.cookies["MainSiteKey"])
+  if !@username
     redirect '/'
   end
-  list_punches = Punch.all(:username => username)
-  list = ""
-  list_punches.each do |stuff|
-    stuff.punchtime
-  list << "#{stuff.username} punched #{stuff.punchstate} on #{stuff.punchtime.strftime(fmt='%F')} at #{stuff.punchtime.strftime(fmt='%T')}<br/>"
-  end
-  return list
+  # @output=""
+  # @total = 0
+  # @list = Punch.all(:username => @username)  # 
+  # (0..@list.length-2).step(2) do |i| 
+  #   @output << "#{@list[i].username} punched #{@list[i].punchstate} on #{@list[i].punchtime.strftime(fmt='%F')} at #{@list[i].punchtime.strftime(fmt='%T')}</br>"
+  #   @output << "#{@list[i+1].username} punched #{@list[i+1].punchstate} on #{@list[i+1].punchtime.strftime(fmt='%F')} at #{@list[i+1].punchtime.strftime(fmt='%T')}</br>"
+  #   @output << "#{((@list[i+1].punchtime - @list[i].punchtime).to_f*24).to_s}</br>"
+  #   @total += ((@list[i+1].punchtime - @list[i].punchtime).to_f*24)
+  # end
+  # @output << "</br></br>Hours Worked: " << @total.to_s
+  # return @output
+        
 end
 
 post '/moduser' do
