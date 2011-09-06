@@ -8,7 +8,7 @@ require 'dm-migrations'
 require 'digest/sha1'
 require 'haml'
 
-require 'tc_functions'
+require './tc_functions'
 require 'sinatra/reloader'
 
 # DataMapper.setup(:default, 'mysql://rubytest:rubytestpass@local.derbserv.org/rubytest')
